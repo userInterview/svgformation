@@ -1,0 +1,105 @@
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<p>Hibernate poss&egrave;de deux niveaux de mise en cache.</p>
+
+<p>- Level 1 :<br />
+&nbsp;Un premier niveau&nbsp;permet de stocker les donn&eacute;es demand&eacute;es pour une m&ecirc;me requ&ecirc;te sur le serveur d&#39;application, ceci pour un m&ecirc;me user, c&#39;est &agrave; dire une m&ecirc;me session. Mais pour une autre session, du m&ecirc;me user ou non, les donn&eacute;es seront &agrave; nouveau rapatri&eacute;es sur le serveur d&#39;application pour la m&ecirc;me requ&ecirc;te.</p>
+
+<p>- Level 2 :<br />
+Le caching de niveau 2&nbsp;permet d&#39;exploiter les donnn&eacute;es quelque soit la session, et permet &agrave; n&#39;importe quel user d&#39;utiliser ces donn&eacute;es. Ceci permet de supprimer le temps d&#39;acc&egrave;s au sgbd et de diminuer le temps de chargement des donn&eacute;es. A une requ&ecirc;te de select correspond une seule mise en cache pour toute session.</p>
+
+<p>- Les framewark de gestion cache niveau 2 :</p>
+
+<ul>
+	<li>ehcache</li>
+	<li>OScache</li>
+	<li>Swam</li>
+</ul>
+
+<p><u><strong>Utilisation d&#39;un framework de gestion de cache Hibernate :</strong></u><br />
+<br />
+<u>&nbsp;- Inclusion dans pom.xml :</u><br />
+EhCache est un framework. Il peut &ecirc;tre inclus dans l&#39;application en ajoutant la d&eacute;pendance Mven :<dependency>&nbsp; <artifactid>hibernate-ehcache</artifactid></dependency></p>
+
+<p>- <u>Autorisation dans Hibernate.hbm.xml</u><br />
+Le fichier de configuration xml doit &ecirc;tre inform&eacute; afin que la gestion de cache de niveau 2 soit autoris&eacute;e.<br />
+<br />
+- <u>Autorisation de mise en cache par classe d&#39;entit&eacute;</u><br />
+Chaque classe java d&#39;entit&eacute; ne b&eacute;n&eacute;ficie pas&nbsp;automatiquement&nbsp;de la possibilit&eacute; d&#39;&ecirc;tre mise en cache &quot;toute session confondue&quot; (Level&nbsp;2).<br />
+C&#39;est une oprion qui doit &ecirc;tre&nbsp;activ&eacute;e par l&#39;annotation @Cachable dans le code source de la classe d&#39;entit&eacute;.<br />
+De plus une autre annotation devra &ecirc;tre utilis&eacute;e pour d&eacute;finir la strategie de mise en cache</p>
+
+<p>Voici la r&eacute;ponse de la console java lorsque,<u> sur la m&ecirc;me session </u>on effectue la <u>m&ecirc;me requete</u> Voir execution classe &quot;TestHibernateCache.java&quot;.<br />
+On vit bien que la req&ecirc;te n&#39;est effectu&eacute;e qu&#39;une seule fois sur la m&ecirc;me session, m&ecirc;me si la requete est demand&eacute;e plusieurs fois<br />
+<br />
+<em>~*************************** DEBUT runFetchOperation() **************************************<br />
+Hibernate: <strong>select tableopera0_.IdOperation as IdOperat1_2_0_, tableopera0_.DateOperation as DateOper2_2_0_, tableopera0_.SocieteOperation as SocieteO3_2_0_ from TableOperations tableopera0_ where tableopera0_.IdOperation=?</strong><br />
+*************************** FIN runFetchOperation() **************************************<br />
+*************************** DEBUT runFetchOperation() **************************************<br />
+*************************** FIN runFetchOperation() **************************************<br />
+*************************** DEBUT runFetchOperation() **************************************<br />
+*************************** FIN runFetchOperation() **************************************</em><br />
+<br />
+<u>- Avec ehCache</u><br />
+On aurait la m&ecirc;me sortie en console m&ecirc;me si on executait la m&ecirc;me requ&ecirc;te sous des&nbsp;sessions diff&eacute;rentes (Level 2)<br />
+Dans le fichier de configutaion hibernate.cfg.xml ajouter&nbsp;les deux propri&eacute;t&eacute;s suivante :<br />
+property name=&quot;hibernate.cache.use-second-level-cache&quot;&nbsp;&nbsp;et la mettre &agrave;&nbsp;&quot;true&quot;<br />
+property name=&quot;hibernate.cache.region.factory_class&quot;&nbsp;&nbsp; et mettre &quot;org.hibernate.cache.ehcache.internal.EhcacheRegionFactor&quot;<br />
+Il faut ensuite indiquer &agrave; l&#39;entit&eacute; qui peut &ecirc;tre mise en cache par le framework (ici ehCache)<br />
+<a href="mailto:~@Cacheable">@Cacheable</a><br />
+@Cache(usage=CacheConcurrencyStrategy.READ_ONLY)</p>
+
+<p><u>Affichage console :</u><br />
+Suite a execution java de <em>TestHibernateCacheLevelTwo.class</em><br />
+<br />
+<em>~Hibernate: select tableopera0_.IdOperation as IdOperat1_2_0_, tableopera0_.DateOperation as DateOper2_2_0_, tableopera0_.SocieteOperation as SocieteO3_2_0_ from TableOperations tableopera0_ where tableopera0_.IdOperation=?<br />
+*************************** FIN runFetchOperation() **************************************<br />
+*************************** DEBUT runFetchOperation() **************************************<br />
+nov. 13, 2018 1:15:48 AM org.hibernate.cache.spi.AbstractRegionFactory start<br />
+WARN: HHH90001001: Attempt to restart an already started RegionFactory.&nbsp; Use sessionFactory.close() between repeated calls to buildSessionFactory. Using previously created RegionFactory.<br />
+nov. 13, 2018 1:15:48 AM org.hibernate.cache.spi.support.EntityReadOnlyAccess <init><br />
+WARN: HHH90001003: Read-only caching was requested for mutable entity [NavigableRole[loiz.hibernate.beans.TableOperation]]<br />
+nov. 13, 2018 1:15:48 AM org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl getIsolatedConnection<br />
+INFO: HHH10001501: Connection obtained from JdbcConnectionAccess [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess@442f92e6] for (non-JTA) DDL execution was not in auto-commit mode; the Connection &#39;local transaction&#39; will be committed and the Connection will be set into auto-commit mode.<br />
+*************************** FIN runFetchOperation() **************************************<br />
+*************************** DEBUT runFetchOperation() **************************************<br />
+nov. 13, 2018 1:15:48 AM org.hibernate.cache.spi.AbstractRegionFactory start<br />
+WARN: HHH90001001: Attempt to restart an already started RegionFactory.&nbsp; Use sessionFactory.close() between repeated calls to buildSessionFactory. Using previously created RegionFactory.<br />
+nov. 13, 2018 1:15:48 AM org.hibernate.cache.spi.support.EntityReadOnlyAccess <init><br />
+WARN: HHH90001003: Read-only caching was requested for mutable entity [NavigableRole[loiz.hibernate.beans.TableOperation]]<br />
+nov. 13, 2018 1:15:48 AM org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl getIsolatedConnection<br />
+INFO: HHH10001501: Connection obtained from JdbcConnectionAccess [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess@64355120] for (non-JTA) DDL execution was not in auto-commit mode; the Connection &#39;local transaction&#39; will be committed and the Connection will be set into auto-commit mode.<br />
+*************************** FIN runFetchOperation() **************************************</init></init></em></p>
+
+<p><u>Cache de requete:&nbsp;&nbsp;</u><br />
+1- Mettre &agrave; jour le fichier de configuration xml de hibernate li&eacute; au code &agrave; <property name="hibernate.cache.use_query_cache">true</property><br />
+~<property name="hibernate.cache.use_query_cache">true</property></p>
+
+<p>2 - Dans le code java ou est execut&eacute;e la requete hql, mettre que celle ci est cacheable<br />
+Query<tabledenrees> myHQLquery = ArgMySess.createQuery(&quot;from TableDenrees&quot;) ;<br />
+&nbsp;&nbsp;&nbsp; myHQLquery.setCacheable(true);Hibernate poss&egrave;de deux niveaux de mise en cache.</tabledenrees></p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+</body>
+</html>

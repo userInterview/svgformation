@@ -1,0 +1,37 @@
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<p><br type="_moz" />
+<u>Les requ&ecirc;tes HQL</u><br />
+- Elles &nbsp;sont sensibles &agrave; la casse<br />
+- Le nom d&#39;une colonne doit en fait &ecirc;tre le nom d&#39;un attribut d&#39;entit&eacute;<br />
+- Le nom de la table doit en fait &ecirc;tre le nom de la table<br />
+Exemple TestSelectColumnsInHQL.java:</p>
+
+<p>SELECT nomDenree, typeDenree, uniteDeVenteDenree, valeurUniteDenree from TableDenrees</p>
+
+<p><u>Les requ&ecirc;tes sql non HQL :</u><br />
+Il est possible d&#39;utiliser des requ&ecirc;tes autres que hql mais des requete sql classiques.<br />
+Dans ce cas, la casse n&#39;a pas d&#39;importance et on fait reference &agrave; des objet sgbd classique (nom de colonne, table etc..)<br />
+<br type="_moz" />
+<u>Remarque :</u><br />
+Je constate que l&#39;on peut acc&eacute;der aux donn&eacute;es d&#39;une table tant que le profil utilis&eacute; dans la configuration hibernate&nbsp;y a acc&egrave;s<br />
+Ceci tant que la requete n&#39;est pas relative, cad designation du sgbd et du shema (dbo ici) &nbsp;:<br />
+SELECT * FROM [afer].[dbo].[WEBCOOPA]</p>
+
+<p><u>Mapping de requ&ecirc;te natives :</u><br />
+<a href="https://www.baeldung.com/jpa-sql-resultset-mapping">https://www.baeldung.com/jpa-sql-resultset-mapping</a><br />
+<a href="https://docs.oracle.com/javaee/7/api/javax/persistence/SqlResultSetMapping.html">https://docs.oracle.com/javaee/7/api/javax/persistence/SqlResultSetMapping.html</a></p>
+
+<p>Impl&eacute;mentation classique requ&ecirc;tes :<br />
+<a href="https://howtodoinjava.com/jpa/jpa-native-query-example-select/">https://howtodoinjava.com/jpa/jpa-native-query-example-select/</a></p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+</body>
+</html>
